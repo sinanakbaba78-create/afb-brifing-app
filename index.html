@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>AFB Brifing</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js" defer></script>
 <style>
   :root{
     --navy:#0A1F44; --royal:#2E5FD0; --gold:#F2B705; --red:#C8102E;
@@ -142,12 +142,15 @@
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app"><div style="min-height:100vh;background:#0A1F44;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 13px -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:2px">
+  <svg viewBox="0 0 100 100" width="64" height="64"><circle cx="50" cy="50" r="49" fill="#0A1F44" stroke="rgba(255,255,255,.35)" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="27" fill="#fff">AFB</text><rect x="30" y="63" width="20" height="3" fill="#F2B705"/><rect x="50" y="63" width="20" height="3" fill="#2E5FD0"/></svg>
+  <div style="margin-top:14px;opacity:.75">BRİFİNG YÜKLENİYOR…</div></div></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
 <script>
 const API = "https://stydttrfgxirsofgtyhn.supabase.co/functions/v1/miniapp-api";
-const tg = window.Telegram && window.Telegram.WebApp;
+let tg = null;
+let rendered = false;
 const DEMO = new URLSearchParams(location.search).has("demo");
 
 const KINDS = {
@@ -188,8 +191,9 @@ function nextTime(k){ const now=new Date(), hm=now.toTimeString().slice(0,5); re
 
 async function api(action, extra={}){
   if(DEMO) return demoApi(action, extra);
-  const r = await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({initData: tg?.initData || "", action, ...extra})});
+  const ctl = new AbortController(); const tmo = setTimeout(()=>ctl.abort(), 15000);
+  const r = await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,
+    body:JSON.stringify({initData: tg?.initData || "", action, ...extra})}).finally(()=>clearTimeout(tmo));
   const j = await r.json().catch(()=>({}));
   if(!r.ok) throw Object.assign(new Error(j.error||"hata"),{status:r.status,data:j});
   return j;
@@ -324,17 +328,18 @@ async function run(komut,arg){
 function gate(t,m,l){ $("#app").innerHTML=`<div class="gate">${ART.replace('class="art"','class="art"')}<svg class="lg" viewBox="0 0 100 100">${LOGO.replace(/<\/?svg[^>]*>/g,"")}</svg><h1 class="serif">${t}</h1><p>${m}</p>${l||""}</div>`; }
 
 async function boot(){
+  tg = (window.Telegram && window.Telegram.WebApp) || null;
   if(tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor("#0A1F44"); }catch(e){} }
   const qs=new URLSearchParams(location.search);
   document.documentElement.dataset.theme = qs.get("theme") || (tg?.colorScheme==="dark"?"dark":"light");
   try{ tg?.setBackgroundColor(getComputedStyle(document.body).backgroundColor); }catch(e){}
   if(!DEMO && !tg?.initData){ gate("AFB Brifing","Bu uygulama Telegram'da <b>@AFBBrifingbot</b> sohbetindeki <b>Brifing</b> düğmesinden açılır.",`<a href="?demo=1">Önizlemeyi gör</a>`); return; }
   $("#app").innerHTML=`<header class="hero" style="height:230px">${ART}</header><main><div class="grid"><div class="sk" style="grid-column:1/-1"></div><div class="sk"></div><div class="sk"></div></div></main>`;
-  try{ state.feed=await api("feed"); home(); }
+  try{ state.feed=await api("feed"); home(); rendered=true; }
   catch(e){
     if(e.status===403) gate("Yetki gerekli",`Bu uygulamayı yalnızca ofis ekibi kullanabilir.<br><br>Telegram kimliğiniz: <code>${esc(e.data?.user_id)}</code><br>Bu numarayı ofis yöneticisine iletin.`);
     else if(e.status===401) gate("Doğrulanamadı","Uygulamayı Telegram'dan kapatıp yeniden açın.");
-    else gate("Bağlantı sorunu","Sunucuya ulaşılamadı. Biraz sonra tekrar deneyin.");
+    else gate("Bağlantı sorunu","Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.",`<a href="javascript:location.reload()">Yeniden dene</a>`);
   }
 }
 
@@ -368,7 +373,9 @@ function demoApi(action){
 }
 
 
-boot();
+window.addEventListener("error",(e)=>{ if(rendered) return;
+  gate("Bir sorun oluştu",`Uygulama açılamadı. Lütfen tekrar deneyin.<br><br><code style="font-size:11px">${esc(e.message||"")}</code>`,`<a href="javascript:location.reload()">Yeniden dene</a>`); });
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 </script>
 </body>
 </html>
