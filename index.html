@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>AFB Brifing</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --navy:#0A1F44; --royal:#2E5FD0; --gold:#F2B705; --red:#C8102E;
+    --bg:#F3F5F9; --card:#FFFFFF; --ink:#0E1A2E; --muted:#66748A; --line:#E4E9F0; --soft:#EEF2F8;
+    --shadow:0 1px 2px rgba(10,31,68,.06),0 6px 20px rgba(10,31,68,.06);
+    --r:18px;
+  }
+  [data-theme="dark"]{
+    --bg:#0A1120; --card:#121B2D; --ink:#EAF0F8; --muted:#8C9AB0; --line:#1F2A40; --soft:#18233A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  a{color:inherit}
+
+  /* ---------- Hero ---------- */
+  .hero{background:radial-gradient(120% 140% at 85% -20%,#2347A0 0%,var(--navy) 55%,#061430 100%);
+    color:#fff;padding:calc(18px + env(safe-area-inset-top)) 18px 64px;position:relative;overflow:hidden}
+  .hero:after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.08)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;flex:none}
+  .brand b{display:block;font-size:16px;letter-spacing:.2px}
+  .brand span{font-size:12.5px;opacity:.72}
+  .greet{margin-top:22px;font-size:26px;font-weight:700;letter-spacing:-.4px}
+  .date{opacity:.72;font-size:13.5px;margin-top:2px}
+  .stats{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);
+    padding:7px 11px;border-radius:999px;font-size:12.5px;display:flex;align-items:center;gap:6px}
+  .stat i{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block}
+  .stat i.r{background:#FF5468}
+  .stripe{position:absolute;left:0;right:0;bottom:0;height:4px;display:flex}
+  .stripe b{flex:1;background:var(--gold)} .stripe b+b{background:var(--royal)}
+
+  /* ---------- Tabs ---------- */
+  .tabs{margin:-40px 14px 0;position:relative;z-index:2;background:var(--card);border-radius:16px;padding:5px;
+    display:grid;grid-template-columns:repeat(3,1fr);box-shadow:var(--shadow)}
+  .tab{padding:10px 0;border-radius:12px;font-weight:600;font-size:14px;color:var(--muted);transition:.2s}
+  .tab.on{background:var(--navy);color:#fff}
+  [data-theme="dark"] .tab.on{background:var(--royal)}
+  .tab .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:var(--red);
+    color:#fff;font-size:11px;line-height:18px}
+
+  main{padding:14px 14px calc(28px + env(safe-area-inset-bottom))}
+  .view{display:none;animation:fade .25s ease} .view.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- Search ---------- */
+  .search{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:14px;padding:4px 4px 4px 14px;
+    box-shadow:var(--shadow);margin-bottom:14px}
+  .search input{flex:1;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;padding:9px 0}
+  .search button{background:var(--gold);color:var(--navy);font-weight:700;padding:9px 14px;border-radius:11px;font-size:13.5px}
+
+  /* ---------- Cards ---------- */
+  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+  .ch{display:flex;align-items:center;gap:12px;padding:14px 14px 10px}
+  .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:20px;flex:none}
+  .ct{flex:1;min-width:0}
+  .ct b{display:block;font-size:15.5px;letter-spacing:-.1px}
+  .ct span{font-size:12.5px;color:var(--muted)}
+  .badge{font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:999px;background:var(--soft);color:var(--muted);white-space:nowrap}
+  .badge.new{background:rgba(242,183,5,.18);color:#9A7300}
+  [data-theme="dark"] .badge.new{color:var(--gold)}
+  .heads{list-style:none;margin:0;padding:0 14px 4px}
+  .heads li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.38}
+  .heads li:first-child{border-top:0}
+  .heads em{font-style:normal;font-weight:800;color:var(--royal);font-size:12.5px;min-width:16px;padding-top:1px}
+  .cf{display:flex;gap:8px;padding:10px 14px 14px}
+  .btn{flex:1;padding:11px 0;border-radius:12px;font-weight:650;font-size:14px;text-align:center}
+  .btn.p{background:var(--navy);color:#fff}
+  [data-theme="dark"] .btn.p{background:var(--royal)}
+  .btn.s{background:var(--soft);color:var(--ink)}
+  .empty-c{padding:4px 14px 6px;color:var(--muted);font-size:13.5px}
+
+  /* ---------- Signals ---------- */
+  .tl{position:relative;padding-left:22px}
+  .tl:before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .sg{position:relative;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:13px 14px;margin-bottom:10px}
+  .sg:before{content:"";position:absolute;left:-20px;top:17px;width:12px;height:12px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 4px var(--bg)}
+  .sg.w:before{background:var(--gold)} .sg.b:before{background:var(--royal)}
+  .sm{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+  .chip{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:rgba(200,16,46,.1);color:var(--red)}
+  .sg.w .chip{background:rgba(242,183,5,.18);color:#9A7300} .sg.b .chip{background:rgba(46,95,208,.12);color:var(--royal)}
+  .tm{font-size:12px;color:var(--muted);white-space:nowrap}
+  .sg h4{margin:0 0 4px;font-size:15px;line-height:1.35}
+  .sg p{margin:0;color:var(--muted);font-size:13.5px}
+  .links{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .lk{font-size:12.5px;padding:6px 10px;border-radius:10px;background:var(--soft);color:var(--royal);font-weight:600}
+
+  /* ---------- Archive ---------- */
+  .filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;margin:0 -14px 4px;padding-left:14px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .f{flex:none;padding:8px 13px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--muted)}
+  .f.on{background:var(--navy);color:#fff} [data-theme="dark"] .f.on{background:var(--royal)}
+  .day{font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase;margin:14px 4px 8px}
+  .row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;box-shadow:var(--shadow);
+    padding:11px 12px;margin-bottom:8px;width:100%;text-align:left}
+  .row .ic{width:36px;height:36px;border-radius:11px;font-size:17px}
+  .row .ct b{font-size:14.5px} .chev{color:var(--muted);font-size:20px}
+  .more{display:block;margin:12px auto 0;padding:10px 18px;border-radius:12px;background:var(--soft);font-weight:600;font-size:13.5px}
+
+  /* ---------- Sheet (detay) ---------- */
+  .sheet{position:fixed;inset:0;background:var(--bg);z-index:20;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .sheet.on{transform:none}
+  .sh{position:sticky;top:0;z-index:2;background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 16px}
+  .sh .x{position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);font-size:18px}
+  .sh small{opacity:.7;font-size:12.5px} .sh h2{margin:4px 0 0;font-size:21px;letter-spacing:-.3px;padding-right:40px}
+  .sh .stripe{height:3px}
+  .sb{padding:14px 14px calc(30px + env(safe-area-inset-bottom))}
+  .frame{background:rgba(242,183,5,.14);border-left:3px solid var(--gold);border-radius:12px;padding:12px 14px;font-style:italic;margin-bottom:12px;font-size:14px}
+  .it{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:14px;margin-bottom:10px}
+  .it .num{font-weight:800;color:var(--red);font-size:13px;letter-spacing:.5px}
+  .it h3{margin:3px 0 6px;font-size:16px;line-height:1.35;letter-spacing:-.1px}
+  .it p{margin:6px 0;font-size:14px}
+  .it .k{font-weight:700}
+  .it .q{color:var(--muted);font-style:italic}
+  .concept{background:var(--navy);color:#fff;border-radius:16px;padding:16px;margin-top:6px}
+  .concept small{color:var(--gold);font-weight:800;letter-spacing:.8px;font-size:11.5px}
+  .concept h3{margin:4px 0 6px;font-size:17px}
+  .concept p{margin:0;opacity:.88;font-size:14px}
+  .sticky-cta{position:sticky;bottom:0;padding:10px 0 calc(6px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+
+  /* ---------- States ---------- */
+  .sk{background:linear-gradient(90deg,var(--soft) 25%,var(--line) 37%,var(--soft) 63%);background-size:400% 100%;
+    animation:sh 1.3s ease infinite;border-radius:var(--r);height:150px;margin-bottom:12px}
+  @keyframes sh{0%{background-position:100% 50%}100%{background-position:0 50%}}
+  .gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;
+    background:radial-gradient(120% 100% at 50% 0%,#1B3A86,var(--navy) 60%);color:#fff}
+  .gate .logo{width:84px;height:84px;margin-bottom:18px}
+  .gate h1{margin:0 0 8px;font-size:22px} .gate p{opacity:.8;margin:0 0 18px;max-width:320px}
+  .gate code{background:rgba(255,255,255,.12);padding:3px 8px;border-radius:8px}
+  .gate a{background:var(--gold);color:var(--navy);text-decoration:none;font-weight:700;padding:11px 18px;border-radius:12px}
+  .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,30px);opacity:0;
+    background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:40;
+    transition:.25s;max-width:90vw;text-align:center}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+  .note{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://stydttrfgxirsofgtyhn.supabase.co/functions/v1/miniapp-api";
+const tg = window.Telegram && window.Telegram.WebApp;
+const DEMO = new URLSearchParams(location.search).has("demo");
+
+const KINDS = {
+  turkiye:   {label:"Türkiye",        sub:"Ekonomi ve Siyaset",       icon:"🇹🇷", bg:"rgba(200,16,46,.12)",  time:"07:30"},
+  dunya:     {label:"Dünya",          sub:"Ekonomi ve Siyaset",       icon:"🌍", bg:"rgba(46,95,208,.13)",  time:"07:45"},
+  bolge:     {label:"Ankara 3. Bölge",sub:"Yerel ve ulusal basın",     icon:"📍", bg:"rgba(31,122,90,.14)",  time:"08:00 · 13:00 · 19:00"},
+  ankaragucu:{label:"Ankaragücü",     sub:"Kulüp gündemi",            icon:"⚽", bg:"rgba(242,183,5,.2)",   time:"10:00"},
+  akparti:   {label:"AK Parti",       sub:"Parti gelişmeleri",         icon:"🏛", bg:"rgba(194,98,45,.15)",  time:"18:00"},
+};
+const ORDER = ["bolge","turkiye","dunya","akparti","ankaragucu"];
+
+const LOGO = `<svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#0A1F44"/>
+<circle cx="50" cy="50" r="49" fill="none" stroke="rgba(255,255,255,.18)"/>
+<text x="50" y="57" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="26" fill="#fff" letter-spacing=".8">AFB</text>
+<rect x="30" y="63" width="20" height="2.4" fill="#F2B705"/><rect x="50" y="63" width="20" height="2.4" fill="#2E5FD0"/></svg>`;
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const state = {feed:null, tab:"brief", archive:[], archiveKind:"", archiveDone:false};
+
+function haptic(t="light"){ try{ tg?.HapticFeedback?.impactOccurred(t) }catch(e){} }
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),2600); }
+function openLink(u){ haptic(); if(tg?.openLink) tg.openLink(u); else window.open(u,"_blank"); }
+
+function ago(ts){
+  const d=(Date.now()-new Date(ts).getTime())/1000;
+  if(d<60) return "az önce"; if(d<3600) return Math.floor(d/60)+" dk önce";
+  if(d<86400) return Math.floor(d/3600)+" sa önce";
+  return new Date(ts).toLocaleDateString("tr-TR",{day:"numeric",month:"short"});
+}
+function hhmm(ts){ return new Date(ts).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}); }
+function dayLabel(ts){
+  const d=new Date(ts), t=new Date(); const y=new Date(); y.setDate(t.getDate()-1);
+  if(d.toDateString()===t.toDateString()) return "Bugün";
+  if(d.toDateString()===y.toDateString()) return "Dün";
+  return d.toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long"});
+}
+
+async function api(action, extra={}){
+  if(DEMO) return demoApi(action, extra);
+  const r = await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({initData: tg?.initData || "", action, ...extra})});
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) throw Object.assign(new Error(j.error||"hata"),{status:r.status,data:j});
+  return j;
+}
+
+/* ---------------- Render ---------------- */
+function shell(){
+  const now=new Date(), h=now.getHours();
+  const hi = h<6?"İyi geceler":h<12?"Günaydın":h<18?"İyi günler":"İyi akşamlar";
+  const name = state.feed?.user?.name;
+  const today = Object.values(state.feed?.latest||{}).filter(b=>new Date(b.ts).toDateString()===now.toDateString()).length;
+  const alertsToday = (state.feed?.alerts||[]).filter(a=>Date.now()-new Date(a.ts)<86400e3).length;
+  $("#app").innerHTML = `
+    <header class="hero">
+      <div class="brand">${LOGO}<div><b>AFB Brifing</b><span>Ahmet Fethan Baykoç · Ankara Milletvekili</span></div></div>
+      <div class="greet">${hi}${name?", "+esc(name):""}</div>
+      <div class="date">${now.toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
+      <div class="stats"><div class="stat"><i></i>Bugün ${today} brifing</div><div class="stat"><i class="r"></i>Son 24 saat ${alertsToday} sinyal</div></div>
+      <div class="stripe"><b></b><b></b></div>
+    </header>
+    <nav class="tabs">
+      <button class="tab" data-t="brief">Brifingler</button>
+      <button class="tab" data-t="sig">Sinyaller${alertsToday?`<span class="n">${alertsToday}</span>`:""}</button>
+      <button class="tab" data-t="arc">Arşiv</button>
+    </nav>
+    <main>
+      <section class="view" id="v-brief"></section>
+      <section class="view" id="v-sig"></section>
+      <section class="view" id="v-arc"></section>
+    </main>`;
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{haptic();setTab(b.dataset.t)});
+  renderBrief(); renderSignals(); setTab(state.tab);
+}
+
+function setTab(t){
+  state.tab=t;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));
+  if(t==="arc" && !state.archive.length) loadArchive(true);
+}
+
+function renderBrief(){
+  const L = state.feed?.latest || {};
+  let html = `<form class="search" id="sf"><span>🔎</span><input id="q" placeholder="Konu ara: Sincan metro, faiz…" enterkeyhint="search"><button>Ara</button></form>`;
+  for(const k of ORDER){
+    const m=KINDS[k], b=L[k], r=b?.report, items=r?.items||[];
+    const fresh = b && Date.now()-new Date(b.ts)<6*3600e3;
+    html += `<article class="card">
+      <div class="ch"><div class="ic" style="background:${m.bg}">${m.icon}</div>
+        <div class="ct"><b>${m.label}</b><span>${m.sub} · ${m.time}</span></div>
+        <span class="badge ${fresh?"new":""}">${b?ago(b.ts):"henüz yok"}</span></div>
+      ${items.length?`<ul class="heads">${items.slice(0,3).map((it,i)=>`<li><em>${String(i+1).padStart(2,"0")}</em><span>${esc(it.title)}</span></li>`).join("")}</ul>`
+        :`<div class="empty-c">${b?"Bu dönemde öne çıkan gelişme yok.":"İlk brifing saatinde burada görünecek."}</div>`}
+      <div class="cf">${items.length?`<button class="btn p" data-open="${k}">Oku (${items.length})</button>`:""}
+        <button class="btn s" data-run="${k}">↻ Şimdi hazırla</button></div>
+    </article>`;
+  }
+  html += `<p class="note">Brifingler ayrıca Telegram'a mesaj ve antetli PDF olarak gönderilir.</p>`;
+  $("#v-brief").innerHTML = html;
+  $("#sf").onsubmit = (e)=>{e.preventDefault(); const q=$("#q").value.trim(); if(q.length<2) return; run("konu",q); $("#q").blur();};
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openReport(L[b.dataset.open]));
+  document.querySelectorAll("[data-run]").forEach(b=>b.onclick=()=>run("briefing",b.dataset.run));
+}
+
+function renderSignals(){
+  const A = state.feed?.alerts || [];
+  if(!A.length){ $("#v-sig").innerHTML = `<div class="card"><div class="empty-c" style="padding:18px">Henüz anlık sinyal yok. Önemli bir gelişme olduğunda burada ve Telegram'da görünecek.</div></div>
+    <button class="btn p" style="width:100%" id="scan">📡 Şu anki en güçlü gelişmeleri getir</button>`; $("#scan").onclick=()=>run("sinyal",""); return; }
+  let html = `<button class="btn p" style="width:100%;margin-bottom:14px" id="scan">📡 Şimdi tara</button><div class="tl">`, last="";
+  for(const a of A){
+    const p=a.payload||{}; const d=dayLabel(a.ts);
+    if(d!==last){ html+=`<div class="day" style="margin-left:-6px">${esc(d)}</div>`; last=d; }
+    const cls = /Bölge|parti/i.test(p.reason)?"b":/Son dakika/i.test(p.reason)?"":"w";
+    html += `<div class="sg ${cls}"><div class="sm"><span class="chip">${esc(p.reason||"Sinyal")}</span><span class="tm">${hhmm(a.ts)} · ${p.sources||1} kaynak</span></div>
+      <h4>${esc(p.title)}</h4>${p.summary?`<p>${esc(p.summary)}</p>`:""}
+      <div class="links">${(p.links||[]).map(([n,u])=>`<button class="lk" data-u="${esc(u)}">${esc(n)} ↗</button>`).join("")}</div></div>`;
+  }
+  $("#v-sig").innerHTML = html+"</div>";
+  $("#scan").onclick=()=>run("sinyal","");
+  $("#v-sig").querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>openLink(b.dataset.u));
+}
+
+function renderArchive(){
+  let html = `<div class="filters">${[["","Tümü"],...ORDER.map(k=>[k,KINDS[k].icon+" "+KINDS[k].label])]
+    .map(([k,l])=>`<button class="f ${state.archiveKind===k?"on":""}" data-k="${k}">${l}</button>`).join("")}</div>`;
+  let last="";
+  if(!state.archive.length) html += `<div class="card"><div class="empty-c" style="padding:18px">Arşivde henüz brifing yok.</div></div>`;
+  state.archive.forEach((b,i)=>{
+    const m=KINDS[b.kind]||{icon:"📌",label:b.kind,bg:"var(--soft)"}; const d=dayLabel(b.ts);
+    if(d!==last){ html+=`<div class="day">${esc(d)}</div>`; last=d; }
+    html += `<button class="row" data-i="${i}"><div class="ic" style="background:${m.bg}">${m.icon}</div>
+      <div class="ct"><b>${esc(b.report?.title||m.label)}</b><span>${hhmm(b.ts)} · ${(b.report?.items||[]).length} başlık</span></div><span class="chev">›</span></button>`;
+  });
+  if(!state.archiveDone && state.archive.length) html += `<button class="more" id="more">Daha fazla</button>`;
+  $("#v-arc").innerHTML = html;
+  $("#v-arc").querySelectorAll(".f").forEach(b=>b.onclick=()=>{haptic();state.archiveKind=b.dataset.k;loadArchive(true)});
+  $("#v-arc").querySelectorAll(".row").forEach(b=>b.onclick=()=>openReport(state.archive[+b.dataset.i]));
+  $("#more")?.addEventListener("click",()=>loadArchive(false));
+}
+
+async function loadArchive(reset){
+  if(reset){ state.archive=[]; state.archiveDone=false; $("#v-arc").innerHTML='<div class="sk"></div><div class="sk"></div>'; }
+  try{
+    const r = await api("archive",{kind:state.archiveKind, offset:state.archive.length});
+    state.archive = state.archive.concat(r.items||[]); state.archiveDone = (r.items||[]).length<30;
+  }catch(e){ toast("Arşiv yüklenemedi"); }
+  renderArchive();
+}
+
+function openReport(b){
+  if(!b) return; haptic("medium");
+  const r=b.report||{}, m=KINDS[b.kind]||{icon:"📌",label:b.kind};
+  const it = (r.items||[]).map((x,i)=>`<div class="it"><div class="num">${String(i+1).padStart(2,"0")}</div>
+      <h3>${esc(x.title)}</h3>${x.summary?`<p>${esc(x.summary)}</p>`:""}
+      ${x.why?`<p><span class="k">🎯 Neden önemli:</span> ${esc(x.why)}</p>`:""}
+      ${x.extra?`<p><span class="k">${esc(x.extra_label||"Not")}:</span> ${esc(x.extra)}</p>`:""}
+      ${x.question?`<p class="q">❓ ${esc(x.question)}</p>`:""}
+      <div class="links">${(x.links||[]).map(([n,u])=>`<button class="lk" data-u="${esc(u)}">${esc(n)} ↗</button>`).join("")}</div></div>`).join("");
+  const c=r.concept&&r.concept.name?`<div class="concept"><small>GÜNÜN KAVRAMI</small><h3>${esc(r.concept.name)}</h3><p>${esc(r.concept.text||"")}</p></div>`:"";
+  $("#sheet").innerHTML = `<div class="sh"><button class="x" id="cls">✕</button>
+      <small>${m.icon} ${esc(dayLabel(b.ts))} · ${hhmm(b.ts)}</small><h2>${esc(r.title||m.label)}</h2></div>
+    <div class="sb">${r.frame?`<div class="frame">${esc(r.frame)}</div>`:""}${it}${c}
+      <div class="sticky-cta"><button class="btn p" style="width:100%" id="rerun">↻ ${esc(m.label)} brifingini yeniden hazırla</button></div></div>`;
+  const sh=$("#sheet"); sh.scrollTop=0; sh.classList.add("on");
+  sh.querySelectorAll("[data-u]").forEach(x=>x.onclick=()=>openLink(x.dataset.u));
+  $("#cls").onclick=closeSheet; $("#rerun").onclick=()=>run("briefing",b.kind);
+  if(tg?.BackButton){ tg.BackButton.show(); tg.BackButton.onClick(closeSheet); }
+}
+function closeSheet(){ $("#sheet").classList.remove("on"); if(tg?.BackButton){ tg.BackButton.hide(); tg.BackButton.offClick(closeSheet);} }
+
+async function run(komut,arg){
+  haptic("medium");
+  try{
+    const r = await api("run",{komut,arg});
+    if(r.ok){ try{tg?.HapticFeedback?.notificationOccurred("success")}catch(e){}
+      toast(komut==="konu"?`“${arg}” aranıyor — sonuç Telegram'a gelecek`:"Hazırlanıyor — 1-2 dk içinde Telegram'a gelecek"); }
+    else toast("Başlatılamadı, tekrar deneyin");
+  }catch(e){ toast("Bağlantı hatası"); }
+}
+
+function gate(title,msg,link){
+  $("#app").innerHTML = `<div class="gate">${LOGO}<h1>${title}</h1><p>${msg}</p>${link||""}</div>`;
+}
+
+async function boot(){
+  if(tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor("#0A1F44"); tg.setBackgroundColor(getComputedStyle(document.body).backgroundColor);}catch(e){} }
+  document.documentElement.dataset.theme = (tg?.colorScheme==="dark" || (!tg?.initData && matchMedia("(prefers-color-scheme: dark)").matches && !DEMO)) ? "dark" : "light";
+  if(new URLSearchParams(location.search).get("theme")) document.documentElement.dataset.theme = new URLSearchParams(location.search).get("theme");
+  if(!DEMO && !tg?.initData){
+    gate("AFB Brifing","Bu uygulama Telegram'da <b>@AFBBrifingbot</b> sohbetindeki <b>Brifing</b> düğmesinden açılır.",
+      `<a href="?demo=1">Önizlemeyi gör</a>`); return;
+  }
+  $("#app").innerHTML = `<header class="hero" style="height:210px"></header><main><div class="sk"></div><div class="sk"></div><div class="sk"></div></main>`;
+  try{ state.feed = await api("feed"); shell(); }
+  catch(e){
+    if(e.status===403) gate("Yetki gerekli",`Bu uygulamayı yalnızca ofis ekibi kullanabilir.<br><br>Telegram kimliğiniz: <code>${esc(e.data?.user_id)}</code><br>Bu numarayı ofis yöneticisine iletin.`);
+    else if(e.status===401) gate("Doğrulanamadı","Uygulamayı Telegram'dan kapatıp yeniden açın.");
+    else gate("Bağlantı sorunu","Sunucuya ulaşılamadı. Biraz sonra tekrar deneyin.");
+  }
+}
+
+/* ---------------- Önizleme verisi (gerçek haber değildir) ---------------- */
+function demoApi(action){
+  const h=(x)=>new Date(Date.now()-x*3600e3).toISOString();
+  const L=(...n)=>n.map(x=>[x,"https://example.com"]);
+  const rep=(id,title,items,frame,concept)=>({id,title,frame,items,concept});
+  const latest={
+    bolge:{kind:"bolge",ts:h(0.6),report:rep("bolge","Ankara 3. Bölge — Akşam",[
+      {title:"[Etimesgut] Örnek: Mahalle bağlantı yolunda altyapı çalışması",summary:"Ana arter iki hafta tek şeritten akacak.",why:"Günlük binlerce işe gidişi etkiliyor.",extra_label:"Vekil için aksiyon",extra:"İlgili kurumla görüşülerek alternatif güzergâh bilgilendirmesi istenebilir.",links:L("Yerel Gazete","Ulusal Ajans")},
+      {title:"[Sincan] Örnek: Organize sanayide yeni yatırım duyuruldu",summary:"Yatırımın iki yıl içinde üretime geçmesi planlanıyor.",why:"İstihdam açısından olumlu sinyal.",extra_label:"Vekil için aksiyon",extra:"OSB yönetimiyle tanışma ziyareti planlanabilir.",links:L("Ekonomi Sitesi")},
+      {title:"[Güdül] Örnek: Kırsal mahallelerde içme suyu hattı yenileniyor",why:"Uzun süredir dile getirilen talep karşılanıyor.",links:L("Yerel Haber")},
+      {title:"[Beypazarı] Örnek: Turizm sezonu değerlendirme toplantısı",links:L("Yerel Gazete")}],"ÖRNEK İÇERİK — gerçek haber değildir. Bölgede bugün ulaşım ve altyapı öne çıktı.")},
+    turkiye:{kind:"turkiye",ts:h(11),report:rep("turkiye","Türkiye: Ekonomi ve Siyaset",[
+      {title:"Örnek: Merkez Bankası para politikası kararını açıkladı",summary:"Karar metninde enflasyon görünümüne ilişkin ifadeler değişti.",why:"Kredi maliyetlerini doğrudan etkiler.",extra_label:"Derin okuma",extra:"Beklenti çapalaması; merkez bankası güvenilirliği.",question:"Sıkı para politikası ile büyüme dengesi hangi sektörde en kırılgan?",links:L("Ekonomi Kanalı","Ulusal Ajans")},
+      {title:"Örnek: Meclis'te bu hafta görüşülecek kanun teklifleri",links:L("Meclis Haberleri")},
+      {title:"Örnek: Dış ticaret verileri yayımlandı",links:L("Ulusal Ajans")}],"ÖRNEK İÇERİK — gerçek haber değildir.",{name:"Zaman tutarsızlığı",text:"Bugün verilen politika sözünün yarın tutulması için teşvik olmaması sorunu; Kydland ve Prescott'un çalışmasıyla bilinir."})},
+    dunya:{kind:"dunya",ts:h(10.8),report:rep("dunya","Dünya: Ekonomi ve Siyaset",[
+      {title:"Örnek: Büyük ekonomiler arasında yeni gümrük vergisi turu",why:"Türk ihracatçısı için hem risk hem fırsat.",links:L("Uluslararası Yayın")},
+      {title:"Örnek: Enerji fiyatlarında haftalık yükseliş",links:L("İş Dünyası Yayını")}],"ÖRNEK İÇERİK — gerçek haber değildir.")},
+    ankaragucu:{kind:"ankaragucu",ts:h(8.5),report:rep("ankaragucu","Ankaragücü",[
+      {title:"Örnek: Takım hafta sonu maçının hazırlıklarını sürdürdü",links:L("Spor Gazetesi")}])},
+  };
+  if(action==="feed") return {user:{name:"Sinan"},latest,alerts:[
+    {ts:h(0.3),payload:{reason:"Bölge / parti takibi",sources:2,title:"[Sincan] Örnek: Organize sanayide yeni yatırım duyuruldu",summary:"Yatırımın iki yıl içinde üretime geçmesi planlanıyor.",links:L("Yerel Gazete","Ekonomi Sitesi")}},
+    {ts:h(2.1),payload:{reason:"5 farklı kaynakta",sources:5,title:"Örnek: Ankara'da büyük altyapı projesi için ihale sonucu açıklandı",summary:"Proje bölgedeki iki ilçeyi kapsıyor.",links:L("Ulusal Ajans","Gazete","Yerel Haber")}},
+    {ts:h(26),payload:{reason:"Son dakika niteliğinde",sources:3,title:"Örnek: Merkez Bankası faiz kararını açıkladı",links:L("Ekonomi Kanalı")}}]};
+  if(action==="archive") return {items:Object.values(latest).filter(b=>!state.archiveKind||b.kind===state.archiveKind)};
+  return {ok:true};
+}
+
+boot();
+</script>
+</body>
+</html>
