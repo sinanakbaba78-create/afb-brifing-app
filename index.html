@@ -232,6 +232,10 @@ function home(){
   <form class="search" id="sf"><span>🔎</span><input id="q" placeholder="Bir konu ara: Sincan metro, faiz…" enterkeyhint="search"><button>Ara</button></form>
   <main>
     <h2 class="sec">Brifingler</h2>
+    ${Object.keys(L).length?"":`<button class="tile wide fade" id="all" style="background:var(--navy);color:#fff;margin-bottom:10px">
+      <div class="th"><span class="e">✨</span><b>İlk brifingleri hazırlayalım</b></div>
+      <div class="wait" style="color:rgba(255,255,255,.8)">Beş brifingin hepsi 1-2 dakika içinde hazırlanıp buraya ve Telegram'a gelir.</div>
+      <div class="btn" style="margin-top:12px;background:var(--gold);color:var(--navy)">Tümünü şimdi hazırla</div></button>`}
     <div class="grid">${tile("bolge",true)}${["turkiye","dunya","akparti","ankaragucu"].map(k=>tile(k,false)).join("")}</div>
     <h2 class="sec">Son sinyaller ${A.length>3?`<button id="allsig">Tümü (${A.length})</button>`:""}</h2>
     <div class="sigs">${sigRows || `<div class="nosig">Şimdilik sakin. Önemli bir gelişme olduğunda burada ve Telegram'da görünür.</div>`}</div>
@@ -249,6 +253,10 @@ function home(){
   $("#allsig")?.addEventListener("click",openSignals);
   $("#scan").onclick=()=>run("sinyal","");
   $("#arc").onclick=openArchive;
+  $("#all")?.addEventListener("click",async()=>{ haptic("medium"); let ok=0;
+    for(const k of ORDER){ try{ const r=await api("run",{komut:"briefing",arg:k}); if(r.ok) ok++; }catch(e){} }
+    toast(ok?`${ok} brifing hazırlanıyor — 1-2 dk sonra uygulamayı yenileyin`:"Başlatılamadı, tekrar deneyin");
+    if(ok){ $("#all").style.opacity=.5; $("#all").disabled=true; setTimeout(async()=>{ try{state.feed=await api("feed"); home();}catch(e){} },120000); } });
 }
 
 function askRun(k){
@@ -351,7 +359,7 @@ function demoApi(action){
     ankaragucu:{kind:"ankaragucu",ts:h(8.5),report:rep("ankaragucu","Ankaragücü",[
       {title:"Örnek: Takım hafta sonu maçının hazırlıklarını sürdürdü",links:L("Spor Gazetesi")}])},
   };
-  if(action==="feed") return {user:{name:"Sinan"},latest,alerts:[
+  if(action==="feed") return {user:{name:"Sinan"},latest:(new URLSearchParams(location.search).has("bos")?{}:latest),alerts:[
     {ts:h(0.3),payload:{reason:"Bölge / parti takibi",sources:2,title:"[Sincan] Örnek: Organize sanayide yeni yatırım duyuruldu",summary:"Yatırımın iki yıl içinde üretime geçmesi planlanıyor.",links:L("Yerel Gazete","Ekonomi Sitesi")}},
     {ts:h(2.1),payload:{reason:"5 farklı kaynakta",sources:5,title:"Örnek: Ankara'da büyük altyapı projesi için ihale sonucu açıklandı",summary:"Proje bölgedeki iki ilçeyi kapsıyor.",links:L("Ulusal Ajans","Gazete","Yerel Haber")}},
     {ts:h(26),payload:{reason:"Son dakika niteliğinde",sources:3,title:"Örnek: Merkez Bankası faiz kararını açıkladı",links:L("Ekonomi Kanalı")}}]};
